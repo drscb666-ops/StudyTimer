@@ -81,6 +81,7 @@ label.btn{display:inline-flex;flex-direction:row;align-items:center;min-height:4
 #fsc button{background:#1e1e1e;color:#fff;border:1px solid #444;border-radius:28px;min-height:52px;min-width:130px;font-size:1.1rem}
 #gate{position:fixed;inset:0;z-index:60;background:var(--bg);overflow:auto;display:flex;align-items:center;justify-content:center;padding:24px}
 .gbox{width:100%;max-width:380px;text-align:center}.gbox h2{margin:12px 0 6px}
+textarea{font:inherit;font-size:.85rem;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;width:100%;resize:vertical}
 button.link{border:0;background:none;color:var(--mut);text-decoration:underline;margin-top:8px}
 #toast{z-index:70}
 </style></head>
@@ -157,7 +158,14 @@ button.link{border:0;background:none;color:var(--mut);text-decoration:underline;
    <button id="aG">Continue with Google</button>
    <p id="pMsg" class="mut" style="margin:0;text-align:center"></p>
   </div>
+  <div id="gPaste" hidden style="text-align:left;margin-top:12px">
+   <label>Or paste your Firebase config here (works on this device straight away)
+    <textarea id="gCfg" rows="5" placeholder='const firebaseConfig = { apiKey: "…", authDomain: "…", projectId: "…", appId: "…" };'></textarea></label>
+   <button id="gSave" style="width:100%;margin-top:8px">Save &amp; reload</button>
+   <p id="gCfgMsg" class="mut" style="margin:6px 0 0"></p>
+  </div>
   <button id="gSkip" class="link">Continue without signing in</button>
+  <p class="mut" style="font-size:.7rem;margin:14px 0 0">build 2026-09-24-e</p>
  </div>
 </div>
 <div id="fsv" hidden><div id="fst"></div><div id="fsc"><button id="fsb">Pause</button><button id="fsx">Exit</button></div></div>
@@ -404,8 +412,8 @@ function gateRender(){
   else show=!(skip||seen);
   $('#gate').hidden=!show;if(!show)return;
   const E=window.App.err,local=location.protocol==='file:',loading=!ready&&!unc&&!timedOut&&!E&&!local;
-  $('#gLoad').hidden=!loading;$('#gForm').hidden=!ready;$('#gNote').hidden=ready||loading;
-  $('#gNote').textContent=unc?'Cloud sync isn’t switched on yet. Paste your Firebase details into firebase-config.js and redeploy the site. Until then your data stays on this device.'
+  $('#gLoad').hidden=!loading;$('#gForm').hidden=!ready;$('#gNote').hidden=ready||loading;$('#gPaste').hidden=!(unc||E==='config');
+  $('#gNote').textContent=unc?'Cloud sync isn’t switched on yet: the firebase-config.js this site loaded still has the placeholder values'+(window.App.seen?' (apiKey begins “'+window.App.seen+'”)':'')+'. Either the edited file wasn’t saved and redeployed, or your browser is showing an older copy. Until it’s fixed your data stays on this device.'
    :local?'This page was opened as a local file. Sign-in only works from your deployed https:// website address, not from a downloaded copy.'
    :E==='config'?'Couldn’t load firebase-config.js. Upload it to the same folder as index.html and redeploy.'
    :E==='sdk'?'Couldn’t load Firebase from Google (gstatic.com). Check your internet connection and that no ad-blocker, VPN or firewall is blocking it.'
@@ -415,6 +423,11 @@ function gateRender(){
 }
 setTimeout(()=>{timedOut=true;gateRender()},6000);
 $('#gSkip').onclick=()=>{dismissed=true;if(window.App.state==='ready'&&authReady)store.set('st.skip',true);gateRender()};
+$('#gSave').onclick=()=>{const c={};for(const m of $('#gCfg').value.matchAll(/(apiKey|authDomain|projectId|appId)\s*["']?\s*:\s*["']([^"']+)["']/g))c[m[1]]=m[2];
+  if(!c.apiKey||!c.projectId||!c.appId){$('#gCfgMsg').textContent='Couldn’t find apiKey, projectId and appId in that text. Copy the whole firebaseConfig block from Firebase.';return}
+  if(!c.authDomain)c.authDomain=c.projectId+'.firebaseapp.com';
+  try{localStorage.setItem('st.fbcfg',JSON.stringify(c))}catch(e){}
+  location.reload()};
 $('#pOpen').onclick=()=>{dismissed=false;store.set('st.skip',false);gateRender()};
 
 /* ---- hooks used by the Firebase module ---- */
@@ -434,11 +447,13 @@ fillSubjects();renderToday();renderT();
 <script type="module">
 const App=window.App,G='https://www.gstatic.com/firebasejs/12.19.0/';
 const fail=(why,e)=>{App.err=why;App.errMsg=(e&&(e.code||e.message))||'';console.error('Study Timer:',why,e);App.changed()};
-let mod=null;
-try{mod=await import('./firebase-config.js')}catch(e){fail('config',e)}
-if(mod){
- const firebaseConfig=mod.firebaseConfig;
- if(!firebaseConfig||String(firebaseConfig.apiKey||'').startsWith('PASTE')){App.state='unconfigured';App.changed()}
+let mod=null,cerr=null;
+try{mod=await import('./firebase-config.js')}catch(e){cerr=e}
+{
+ const isPh=c=>!c||String(c.apiKey||'').startsWith('PASTE');
+ let firebaseConfig=mod&&mod.firebaseConfig;
+ if(isPh(firebaseConfig)){try{const s=JSON.parse(localStorage.getItem('st.fbcfg')||'null');if(s&&!isPh(s))firebaseConfig=s}catch(e){}}
+ if(isPh(firebaseConfig)){if(cerr)fail('config',cerr);else{App.seen=String((mod.firebaseConfig&&mod.firebaseConfig.apiKey)||'').slice(0,9);App.state='unconfigured';App.changed()}}
  else{
   let fa,fu,ff;
   try{[fa,fu,ff]=await Promise.all([import(G+'firebase-app.js'),import(G+'firebase-auth.js'),import(G+'firebase-firestore.js')])}catch(e){fail('sdk',e)}
