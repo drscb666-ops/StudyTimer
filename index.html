@@ -84,9 +84,14 @@ label.btn{display:inline-flex;flex-direction:row;align-items:center;min-height:4
 textarea{font:inherit;font-size:.85rem;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;width:100%;resize:vertical}
 button.link{border:0;background:none;color:var(--mut);text-decoration:underline;margin-top:8px}
 #toast{z-index:70}
+.bad{color:#d64545!important}
+.menu{padding:4px 14px}
+.mrow{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;border-top:1px solid var(--line);border-radius:0;background:none;min-height:54px;font-size:1rem;padding:0 2px;text-align:left}
+.mrow:first-child{border-top:0}
+.pw{display:flex;gap:8px}.pw button{padding:0 14px;flex:none}
 </style></head>
 <body><div class="wrap">
-<header><div class="hl"><button id="pf" class="av out" aria-label="Profile"></button><h1>⏱ Study Timer</h1></div><nav class="tabs"><button id="tT" class="on">Timer</button><button id="tA">Analysis</button></nav></header>
+<header><div class="hl"><button id="pf" class="av out" aria-label="Profile"></button><h1>⏱ Study Timer</h1></div></header>
 
 <main id="vT">
  <div class="seg" id="modes"><button data-m="pomo">Pomodoro</button><button data-m="timer">Timer</button><button data-m="sw">Stopwatch</button></div>
@@ -108,9 +113,11 @@ button.link{border:0;background:none;color:var(--mut);text-decoration:underline;
   <p id="sSw" class="mut" style="margin:0">Counts up from 0:00. Press “Finish &amp; save” when you stop and only the time you actually studied is recorded.</p>
  </section>
  <div class="today" id="today"></div>
+ <div class="today" id="sync" style="cursor:pointer;margin-top:4px"></div>
 </main>
 
 <main id="vA" hidden>
+ <button id="aBack" style="margin-bottom:12px">← Back</button>
  <div class="seg" id="rng"><button data-r="day">Day</button><button data-r="week">Week</button><button data-r="month">Month</button></div>
  <div class="nav"><button id="pv">‹</button><strong id="lbl"></strong><button id="nx">›</button></div>
  <div class="cards4" id="kpi"></div>
@@ -139,9 +146,34 @@ button.link{border:0;background:none;color:var(--mut);text-decoration:underline;
    <div class="row"><span class="mut">Member since</span><em id="pSince"></em></div>
    <div class="row"><span class="mut">Total studied</span><em id="pStat"></em></div>
   </div>
-  <button id="pOutBtn" class="danger">Sign out</button>
  </section>
+ <section class="card menu">
+  <button class="mrow" id="mAna"><span>📊 Study analysis</span><span class="mut">›</span></button>
+  <button class="mrow" id="mPw" hidden><span>🔑 Change password</span><span class="mut">›</span></button>
+ </section>
+ <section class="card" id="pCloud" hidden>
+  <h3>Cloud sync</h3>
+  <p id="pSync" class="mut" style="margin:0 0 10px"></p>
+  <button id="pSyncBtn" style="width:100%">Sync now &amp; test connection</button>
+ </section>
+ <button id="pOutBtn" class="danger" hidden>Sign out</button>
  <button id="inst" hidden style="width:100%;margin-top:12px">Install app</button>
+</main>
+<main id="vW" hidden>
+ <button id="wBack" style="margin-bottom:12px">← Back</button>
+ <section class="card">
+  <h3>Change password</h3>
+  <p id="wNo" class="mut" hidden>You signed in with Google, so your password is managed by your Google account.</p>
+  <div id="wForm" style="display:grid;gap:10px">
+   <label>Current password<div class="pw"><input id="wCur" type="password" autocomplete="current-password"><button type="button" class="eye" data-t="wCur">👁</button></div></label>
+   <label>New password (6+ characters)<div class="pw"><input id="wNew" type="password" autocomplete="new-password"><button type="button" class="eye" data-t="wNew">👁</button></div></label>
+   <label>Confirm new password<div class="pw"><input id="wNew2" type="password" autocomplete="new-password"><button type="button" class="eye" data-t="wNew2">👁</button></div></label>
+   <button id="wSave" class="pri" style="width:100%">Update password</button>
+   <button id="wReset" class="link">Forgot it? Email me a reset link</button>
+   <p id="wMsg" class="mut" style="margin:0"></p>
+   <p class="mut" style="margin:0;font-size:.75rem">For security, Firebase never stores or reveals your existing password. Type it here (tap 👁 to check what you typed) to confirm it’s you.</p>
+  </div>
+ </section>
 </main>
 </div>
 <div id="gate">
@@ -202,9 +234,9 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 function add(sec,end,mode,subject){
   sec=Math.floor(sec);if(sec<5)return false;
   const s={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),end,dur:sec,mode,subject:(subject||'').trim()||'Unlabelled'};
-  if(!(cl()&&cl().put(s)))s.pending=true;
+  s.pending=true;
   sessions.push(s);
-  store.set('st.sessions',sessions);renderToday();fillSubjects();return true}
+  store.set('st.sessions',sessions);renderToday();fillSubjects();cl()&&cl().flush();return true}
 function fillSubjects(){$('#subs').innerHTML=[...new Set(sessions.map(s=>s.subject).filter(s=>s!=='Unlabelled'))].map(s=>`<option value="${esc(s)}">`).join('')}
 function renderToday(){
   const n=new Date(),a=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime(),b=a+864e5;let sec=0,c=0;
@@ -285,8 +317,8 @@ addEventListener('pagehide',()=>{if(A){A.beat=Date.now();persist()}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&A&&A.run)wake()});
 
 /* tabs */
-function view(v){$('#vT').hidden=v!=='T';$('#vA').hidden=v!=='A';$('#vP').hidden=v!=='P';$('#tT').classList.toggle('on',v==='T');$('#tA').classList.toggle('on',v==='A');if(v==='A')renderA();if(v==='P')renderP();scrollTo(0,0)}
-$('#tT').onclick=()=>view('T');$('#tA').onclick=()=>view('A');
+function view(v){['T','A','P','W'].forEach(x=>$('#v'+x).hidden=v!==x);if(v==='A')renderA();if(v==='P')renderP();if(v==='W')renderW();scrollTo(0,0)}
+$('#sync').onclick=()=>view('P');document.querySelector('h1').onclick=()=>view('T');
 
 /* analysis */
 function win(){
@@ -346,12 +378,18 @@ addEventListener('appinstalled',()=>$('#inst').hidden=true);
 const refreshAll=()=>{renderToday();fillSubjects();if(!$('#vA').hidden)renderA();if(!$('#vP').hidden)renderP()};
 
 /* ---- profile + sign-in page ---- */
-let U=null,PR=store.get('st.profile',{}),dismissed=false,authReady=false,timedOut=false;
+let U=null,PR=store.get('st.profile',{}),dismissed=false,authReady=false,timedOut=false,SY={s:'',m:''};
 const nameOf=()=>PR.name||(U&&(U.name||(U.email||'').split('@')[0]))||'';
 const photoOf=()=>PR.photo||(U&&U.photo)||'';
 const PERSON='<svg viewBox="0 0 24 24" width="58%" height="58%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>';
 const av=()=>photoOf()?`<img src="${esc(photoOf())}" alt="" referrerpolicy="no-referrer">`:U?`<b>${esc((nameOf()[0]||'?').toUpperCase())}</b>`:PERSON;
-function refreshUI(){const b=$('#pf');b.innerHTML=av();b.classList.toggle('out',!U&&!photoOf());b.title=U?nameOf():'Sign in';gateRender();if(!$('#vP').hidden)renderP()}
+function refreshUI(){const b=$('#pf');b.innerHTML=av();b.classList.toggle('out',!U&&!photoOf());b.title=U?nameOf():'Sign in';gateRender();renderSync();if(!$('#vP').hidden)renderP()}
+function renderSync(){
+  const bad=!!U&&SY.s==='error';
+  $('#sync').textContent=!U?'Saved on this device only — sign in (profile icon) to sync':SY.s==='error'?'⚠ Not saved to the cloud — tap for details':SY.s==='ok'?'☁ Synced to your account':SY.s==='syncing'?'☁ Syncing…':'☁ Connecting…';
+  $('#sync').classList.toggle('bad',bad);
+  $('#pSync').textContent=!U?'':SY.s==='error'?SY.m:SY.s==='ok'?(SY.m||'All your data is saved to your account.'):SY.s==='syncing'?'Syncing…':'Connecting…';
+  $('#pSync').classList.toggle('bad',bad)}
 function renderP(){
   $('#pOut').hidden=!!U;$('#pIn').hidden=!U;
   if(!U){}
@@ -360,14 +398,15 @@ function renderP(){
     $('#pWay').textContent=(U.providers||[]).map(x=>x==='google.com'?'Google':x==='password'?'Email & password':x).join(', ')||'—';
     $('#pSince').textContent=U.created?new Date(U.created).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):'—';
     const t=sessions.reduce((a,s)=>a+s.dur,0);$('#pStat').textContent=sessions.length?`${dur(t)} · ${sessions.length} sessions`:'No sessions yet';
-    $('#pRm').hidden=!PR.photo}}
+    $('#pRm').hidden=!PR.photo}
+  $('#pCloud').hidden=!U;$('#pOutBtn').hidden=!U;$('#mPw').hidden=!U;renderSync()}
 $('#pf').onclick=()=>view('P');$('#pBack').onclick=()=>view('T');
 const authRun=async f=>{$('#pMsg').textContent='';try{await f()}catch(e){$('#pMsg').textContent=window.App.auth.nice(e)}};
 $('#aIn').onclick=()=>authRun(()=>window.App.auth.in($('#aE').value.trim(),$('#aP').value));
 $('#aUp').onclick=()=>authRun(()=>window.App.auth.up($('#aE').value.trim(),$('#aP').value));
 $('#aG').onclick=()=>authRun(()=>window.App.auth.google());
 $('#aP').onkeydown=e=>{if(e.key==='Enter')$('#aIn').click()};
-$('#pOutBtn').onclick=()=>{store.set('st.skip',false);window.App.auth.out().then(()=>view('T'))};
+$('#pOutBtn').onclick=async()=>{const ok=await window.App.auth.out();if(ok!==false){store.set('st.skip',false);view('T');gateRender()}};
 $('#pSave').onclick=()=>{const n=$('#pName').value.trim().slice(0,40);window.App.setProfile({name:n});cl()&&cl().profile({name:n});toast('Name saved')};
 function setPhoto(d){window.App.setProfile({photo:d});cl()&&cl().profile({photo:d});toast(d?'Photo updated':'Photo removed')}
 $('#pRm').onclick=()=>setPhoto('');
@@ -430,6 +469,21 @@ $('#gSave').onclick=()=>{const c={};for(const m of $('#gCfg').value.matchAll(/(a
   location.reload()};
 $('#pOpen').onclick=()=>{dismissed=false;store.set('st.skip',false);gateRender()};
 
+/* ---- profile sub-pages: analysis, password, sync ---- */
+$('#mAna').onclick=()=>view('A');$('#mPw').onclick=()=>view('W');
+$('#aBack').onclick=()=>view('P');$('#wBack').onclick=()=>view('P');
+function renderW(){const has=!!U&&(U.providers||[]).includes('password');$('#wNo').hidden=has;$('#wForm').hidden=!has;$('#wMsg').textContent=''}
+$$('.eye').forEach(b=>b.onclick=()=>{const i=$('#'+b.dataset.t);i.type=i.type==='password'?'text':'password'});
+$('#wSave').onclick=async()=>{const c=$('#wCur').value,n=$('#wNew').value,m=$('#wMsg');
+  if(!c||!n){m.textContent='Fill in your current and new password.';return}
+  if(n.length<6){m.textContent='New password needs at least 6 characters.';return}
+  if(n!==$('#wNew2').value){m.textContent='The two new passwords don’t match.';return}
+  m.textContent='Updating…';
+  try{await window.App.auth.changePw(c,n);m.textContent='✓ Password updated. Use the new one next time you sign in.';['wCur','wNew','wNew2'].forEach(i=>$('#'+i).value='')}
+  catch(e){m.textContent=window.App.auth.nice(e)||'Could not update the password.'}};
+$('#wReset').onclick=async()=>{const m=$('#wMsg');try{await window.App.auth.reset(U.email);m.textContent='Reset link sent to '+U.email+'. Check your inbox and spam folder.'}catch(e){m.textContent=window.App.auth.nice(e)}};
+$('#pSyncBtn').onclick=()=>window.App.syncNow&&window.App.syncNow();
+
 /* ---- hooks used by the Firebase module ---- */
 window.App={cloud:null,auth:null,state:undefined,
  getPending:()=>sessions.filter(s=>s.pending),
@@ -437,6 +491,8 @@ window.App={cloud:null,auth:null,state:undefined,
  setCfg:c=>{Object.assign(cfg,c);store.set('st.cfg',cfg);renderT()},
  applyCloud:list=>{const ids=new Set(list.map(s=>s.id));sessions=list.concat(sessions.filter(s=>s.pending&&!ids.has(s.id)));store.set('st.sessions',sessions);refreshAll()},
  clearLocal:()=>{sessions=[];store.set('st.sessions',sessions);refreshAll()},
+ markSynced:id=>{const s=sessions.find(x=>x.id===id);if(s){delete s.pending;store.set('st.sessions',sessions)}},
+ setSync:(s,m)=>{SY={s,m:m||''};renderSync()},
  setUser:u=>{U=u;authReady=true;store.set('st.seen',!!u);if(!u){PR={};store.set('st.profile',PR)}refreshUI()},
  setProfile:p=>{Object.assign(PR,p);store.set('st.profile',PR);refreshUI()},
  changed:refreshUI};
@@ -458,36 +514,78 @@ try{mod=await import('./firebase-config.js')}catch(e){cerr=e}
   let fa,fu,ff;
   try{[fa,fu,ff]=await Promise.all([import(G+'firebase-app.js'),import(G+'firebase-auth.js'),import(G+'firebase-firestore.js')])}catch(e){fail('sdk',e)}
   if(fa)try{
-   const {initializeApp}=fa,{getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut}=fu,
-    {getFirestore,collection,doc,setDoc,deleteDoc,getDoc,onSnapshot}=ff;
-   const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-   let uid=null,unsub=null,ct;
+   const {initializeApp}=fa,{getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,EmailAuthProvider,reauthenticateWithCredential,updatePassword,sendPasswordResetEmail}=fu,
+    {initializeFirestore,collection,doc,setDoc,deleteDoc,getDoc,getDocsFromServer,onSnapshot}=ff;
+   const app=initializeApp(firebaseConfig),auth=getAuth(app),db=initializeFirestore(app,{experimentalAutoDetectLongPolling:true});
+   let uid=null,unsub=null,ct,flushing=null;
    const col=()=>collection(db,'users',uid,'sessions'),udoc=()=>doc(db,'users',uid);
    const clean=s=>{const r={...s};delete r.pending;return r};
+   const tmo=(p,ms=15000)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(Object.assign(new Error('timeout'),{code:'timeout'})),ms))]);
+   const explain=e=>{const c=(e&&e.code)||'',m=(e&&e.message)||'';
+    if(/API has not been used|is disabled/i.test(m))return 'Cloud Firestore isn’t enabled for this project. In the Firebase console open Firestore Database and click Create database.';
+    if(c==='permission-denied'||/insufficient permissions/i.test(m))return 'Firestore is blocking saves (rules). In the Firebase console go to Firestore Database → Rules, paste the rules from firestore.rules and press Publish.';
+    if(c==='not-found'||c==='failed-precondition')return 'The Firestore database doesn’t exist yet. In the Firebase console go to Firestore Database → Create database.';
+    if(c==='unavailable'||c==='deadline-exceeded'||c==='timeout'||c==='network-request-failed')return 'Can’t reach Firebase right now (offline or blocked). Your data is kept on this device and uploads when the connection is back.';
+    if(c==='unauthenticated')return 'You’re signed out. Please sign in again.';
+    return (c?c+': ':'')+(m||'unknown error')};
+   const bad=e=>{console.error(e);App.setSync('error',explain(e))};
+   function flush(){
+    if(!uid)return Promise.resolve();
+    if(flushing)return flushing;
+    flushing=(async()=>{
+     const list=App.getPending();if(!list.length)return;
+     App.setSync('syncing');
+     try{for(const s of list){await tmo(setDoc(doc(col(),s.id),clean(s)));App.markSynced(s.id)}App.setSync('ok')}
+     catch(e){bad(e)}
+    })().finally(()=>{flushing=null});
+    return flushing}
    App.cloud={
-    put:s=>uid&&setDoc(doc(col(),s.id),clean(s)).catch(console.error),
-    del:id=>uid&&deleteDoc(doc(col(),id)).catch(console.error),
-    cfg:c=>{if(!uid)return;clearTimeout(ct);ct=setTimeout(()=>setDoc(udoc(),{cfg:c},{merge:true}).catch(console.error),800)},
-    profile:p=>uid&&setDoc(udoc(),{profile:p},{merge:true}).catch(console.error)
+    flush,
+    del:id=>uid&&tmo(deleteDoc(doc(col(),id))).catch(bad),
+    cfg:c=>{if(!uid)return;clearTimeout(ct);ct=setTimeout(()=>tmo(setDoc(udoc(),{cfg:c},{merge:true})).catch(bad),800)},
+    profile:p=>uid&&tmo(setDoc(udoc(),{profile:p},{merge:true})).catch(bad)
    };
-   const nice=e=>e.code==='auth/invalid-credential'||e.code==='auth/wrong-password'||e.code==='auth/user-not-found'?'Wrong email or password':e.code==='auth/invalid-email'?'That email address doesn’t look right':e.code==='auth/email-already-in-use'?'That email already has an account — tap Sign in':e.code==='auth/weak-password'?'Password needs at least 6 characters':e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request'?'':e.code==='auth/operation-not-allowed'?'This sign-in method isn’t enabled in Firebase yet (Authentication → Sign-in method)':e.code==='auth/unauthorized-domain'?'This website address isn’t authorised in Firebase (Authentication → Settings → Authorized domains)':e.code==='auth/network-request-failed'?'Network problem — check your connection':(e.message||'Something went wrong').replace('Firebase: ','');
+   App.syncNow=async()=>{if(!uid)return;App.setSync('syncing');
+    try{await flush();await tmo(setDoc(udoc(),{lastSync:Date.now()},{merge:true}));
+     const q=await tmo(getDocsFromServer(col()));App.applyCloud(q.docs.map(d=>d.data()));
+     App.setSync('ok','Connected ✓ '+q.size+' session'+(q.size===1?'':'s')+' stored in your account.')}
+    catch(e){bad(e)}};
+   const nice=e=>{const c=e.code;return c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found'?'Wrong email or password'
+    :c==='app/wrong-current'?'Your current password is wrong'
+    :c==='auth/invalid-email'?'That email address doesn’t look right'
+    :c==='auth/email-already-in-use'?'That email already has an account — tap Sign in'
+    :c==='auth/weak-password'?'Password needs at least 6 characters'
+    :c==='auth/too-many-requests'?'Too many attempts — wait a few minutes and try again'
+    :c==='auth/requires-recent-login'?'For security, sign out and sign in again, then retry'
+    :c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request'?''
+    :c==='auth/operation-not-allowed'?'This sign-in method isn’t enabled in Firebase yet (Authentication → Sign-in method)'
+    :c==='auth/unauthorized-domain'?'This website address isn’t authorised in Firebase (Authentication → Settings → Authorized domains)'
+    :c==='auth/network-request-failed'?'Network problem — check your connection'
+    :(e.message||'Something went wrong').replace('Firebase: ','')};
    App.auth={
     in:(e,p)=>signInWithEmailAndPassword(auth,e,p),
     up:(e,p)=>createUserWithEmailAndPassword(auth,e,p),
     google:()=>signInWithPopup(auth,new GoogleAuthProvider()),
-    out:()=>signOut(auth).then(()=>App.clearLocal()),
+    reset:e=>sendPasswordResetEmail(auth,e),
+    changePw:async(cur,nw)=>{const u=auth.currentUser;
+     try{await reauthenticateWithCredential(u,EmailAuthProvider.credential(u.email,cur))}
+     catch(e){if(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password')throw Object.assign(new Error('x'),{code:'app/wrong-current'});throw e}
+     await updatePassword(u,nw)},
+    out:async()=>{await flush();const n=App.getPending().length;
+     if(n&&!confirm(n+' session(s) haven’t reached the cloud yet. If you sign out now they will be lost. Sign out anyway?'))return false;
+     await signOut(auth);App.clearLocal();return true},
     nice};
    App.state='ready';
    onAuthStateChanged(auth,async u=>{
     unsub&&unsub();unsub=null;
-    if(!u){uid=null;App.setUser(null);return}
-    uid=u.uid;
+    if(!u){uid=null;App.setSync('');App.setUser(null);return}
+    uid=u.uid;App.setSync('syncing');
     App.setUser({email:u.email,name:u.displayName,photo:u.photoURL,created:u.metadata.creationTime,providers:u.providerData.map(p=>p.providerId)});
-    App.getPending().forEach(s=>App.cloud.put(s));
-    try{const d=await getDoc(udoc()),x=d.exists()?d.data():{};
+    flush();
+    try{const d=await tmo(getDoc(udoc())),x=d.exists()?d.data():{};
      if(x.cfg)App.setCfg(x.cfg);else App.cloud.cfg(App.getCfg());
-     if(x.profile)App.setProfile(x.profile)}catch(e){console.error(e)}
-    unsub=onSnapshot(col(),snap=>App.applyCloud(snap.docs.map(d=>d.data())),e=>console.error(e));
+     if(x.profile)App.setProfile(x.profile)}catch(e){bad(e)}
+    unsub=onSnapshot(col(),snap=>{if(snap.metadata.fromCache)return;App.applyCloud(snap.docs.map(d=>d.data()));if(!App.getPending().length)App.setSync('ok')},bad);
    },e=>fail('init',e));
    App.changed();
   }catch(e){fail('init',e)}
