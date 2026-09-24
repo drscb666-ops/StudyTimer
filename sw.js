@@ -1,5 +1,5 @@
 // Service worker: lets the app open offline and load fast.
-const V = 'study-timer-v1';
+const V = 'study-timer-v2';
 const SHELL = ['./', './index.html', './firebase-config.js', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -20,5 +20,5 @@ self.addEventListener('fetch', e => {
     return;
   }
   // own files: network first (so updates arrive), cache as offline fallback
-  e.respondWith(fetch(r).then(store).catch(() => caches.match(r).then(h => h || caches.match('./index.html'))));
+  e.respondWith(fetch(r,{cache:'reload'}).then(store).catch(() => caches.match(r).then(h => h || caches.match('./index.html'))));
 });
