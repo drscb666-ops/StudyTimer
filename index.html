@@ -297,7 +297,7 @@ textarea{font:inherit;font-size:.85rem;color:inherit;background:var(--bg);border
  <div class="ctl" style="margin-top:16px"><button id="eCancel" style="flex:1">Cancel</button><button id="eSave" class="pri" style="flex:1">Save</button></div>
 </div></div>
 <div id="toast"></div>
-<video id="pipv" muted playsinline autopictureinpicture style="position:fixed;width:120px;height:54px;opacity:.01;pointer-events:none;left:-9999px;top:0"></video>
+<video id="pipv" src="pip.mp4" muted loop playsinline autopictureinpicture style="position:fixed;width:120px;height:120px;opacity:.01;pointer-events:none;left:-9999px;top:0"></video>
 <audio id="silence" loop playsinline style="display:none"><source src="data:audio/wav;base64,UklGRoQJAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YWAJAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA=" type="audio/wav"></audio>
 
 <script>
@@ -487,45 +487,27 @@ function fsShow(on){const c=$('#fsc');c.classList.toggle('on',on);clearTimeout(f
 function fsOpen(){if(document.activeElement)document.activeElement.blur();fsKey='';$('#fst').dataset.k='';$('#fsv').hidden=false;fsShow(false);render();wake();pipArm();
   try{const r=document.documentElement.requestFullscreen;r&&r.call(document.documentElement).catch(()=>{})}catch(e){}}
 function fsClose(){$('#fsv').hidden=true;try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}if(!(A&&A.run))unwake()}
-/* ---- floating mini timer (system Picture-in-Picture) ---- */
-let pipCanvas,pipCtx,pipStream,pipRAF,pipArmed=false;
+/* ---- floating mini timer (system Picture-in-Picture) ----
+   Uses a real, tiny looping video file so Safari/iPadOS (which every iOS browser
+   must render with) accepts it — a live canvas-drawn "video" is unreliable there.
+   The live countdown itself is shown on the Lock Screen / Control Center "Now
+   Playing" card via the Media Session updates in render(), not inside the floating
+   window itself. */
 const pipOk=()=>'pictureInPictureEnabled' in document&&document.pictureInPictureEnabled&&'requestPictureInPicture' in HTMLVideoElement.prototype;
-function pipDrawFrame(){
-  if(!pipCtx)return;
-  pipCtx.fillStyle='#000';pipCtx.fillRect(0,0,240,108);
-  let tg,e=0,ph='idle';
-  if(A){e=elapsed();tg=A.target;ph=A.phase}else tg=targetOf();
-  const d=tg?Math.max(0,Math.ceil(tg-e)):Math.floor(e);
-  pipCtx.fillStyle=ph==='break'?'#ffab66':'#fff';
-  pipCtx.font='700 46px system-ui,Arial,sans-serif';pipCtx.textAlign='center';pipCtx.textBaseline='middle';
-  pipCtx.fillText(clock(d),120,58)}
-function pipLoop(){
-  const active=(!$('#fsv').hidden)||document.pictureInPictureElement===$('#pipv');
-  if(!active){pipRAF=null;return}
-  pipDrawFrame();pipRAF=requestAnimationFrame(pipLoop)}
-function pipEnsure(){
-  if(pipCanvas)return;
-  pipCanvas=document.createElement('canvas');pipCanvas.width=240;pipCanvas.height=108;pipCtx=pipCanvas.getContext('2d');
-  pipDrawFrame();pipStream=pipCanvas.captureStream(6);const v=$('#pipv');v.srcObject=pipStream;
-  v.addEventListener('play',()=>{if(A&&!A.run)start()});v.addEventListener('pause',()=>{if(A&&A.run)pause()});
-  v.addEventListener('enterpictureinpicture',()=>{if(!pipRAF)pipLoop()})}
+$('#pipv').addEventListener('play',()=>{if(A&&!A.run)start()});
+$('#pipv').addEventListener('pause',()=>{if(A&&A.run)pause()});
 function pipArm(){
-  if(pipArmed||!pipOk())return;
-  try{pipEnsure();$('#pipv').play().then(()=>{pipArmed=true;if(!pipRAF)pipLoop()}).catch(()=>{})}catch(e){}}
+  if(!pipOk())return;
+  try{const v=$('#pipv');if(v.paused)v.play().catch(()=>{})}catch(e){}}
 function pipOpen(){
   if(!pipOk()){toast('Floating mini timer isn’t supported in this browser');return}
   try{
-    pipEnsure();const v=$('#pipv');
-    if(v.paused)v.play().catch(()=>{});
-    v.requestPictureInPicture().then(()=>{pipArmed=true;if(!pipRAF)pipLoop()}).catch(e=>{
-      console.error('PiP error',e);toast('Couldn’t open the floating timer here'+(e&&e.name?' ('+e.name+')':''))})
+    const v=$('#pipv');if(v.paused)v.play().catch(()=>{});
+    v.requestPictureInPicture().catch(e=>{console.error('PiP error',e);toast('Couldn’t open the floating timer here'+(e&&e.name?' ('+e.name+')':''))})
   }catch(e){console.error('PiP error',e);toast('Couldn’t open the floating timer here'+(e&&e.name?' ('+e.name+')':''))}}
 function pipTeardown(){
   try{if(document.pictureInPictureElement===$('#pipv'))document.exitPictureInPicture()}catch(e){}
-  cancelAnimationFrame(pipRAF);pipRAF=null;
-  try{$('#pipv').pause()}catch(e){}
-  if(pipStream){pipStream.getTracks().forEach(t=>t.stop());pipStream=null}
-  pipArmed=false;pipCanvas=null;pipCtx=null}
+  try{$('#pipv').pause()}catch(e){}}
 $('#fsp').onclick=pipOpen;
 if(pipOk())$('#fsp').hidden=false;
 
