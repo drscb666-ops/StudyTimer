@@ -1,6 +1,6 @@
 // Service worker: lets the app open offline and load fast.
 const V = 'study-timer-v2';
-const SHELL = ['./', './index.html', './firebase-config.js', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './pip.mp4'];
+const SHELL = ['./', './index.html', './firebase-config.js', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
