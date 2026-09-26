@@ -297,7 +297,7 @@ textarea{font:inherit;font-size:.85rem;color:inherit;background:var(--bg);border
  <div class="ctl" style="margin-top:16px"><button id="eCancel" style="flex:1">Cancel</button><button id="eSave" class="pri" style="flex:1">Save</button></div>
 </div></div>
 <div id="toast"></div>
-<video id="pipv" muted playsinline autopictureinpicture style="position:fixed;width:2px;height:2px;opacity:0;pointer-events:none;left:-10px;top:-10px"></video>
+<video id="pipv" muted playsinline autopictureinpicture style="position:fixed;width:120px;height:54px;opacity:.01;pointer-events:none;left:-9999px;top:0"></video>
 <audio id="silence" loop playsinline style="display:none"><source src="data:audio/wav;base64,UklGRoQJAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YWAJAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA=" type="audio/wav"></audio>
 
 <script>
@@ -503,17 +503,23 @@ function pipLoop(){
   const active=(!$('#fsv').hidden)||document.pictureInPictureElement===$('#pipv');
   if(!active){pipRAF=null;return}
   pipDrawFrame();pipRAF=requestAnimationFrame(pipLoop)}
-async function pipArm(){
+function pipEnsure(){
+  if(pipCanvas)return;
+  pipCanvas=document.createElement('canvas');pipCanvas.width=240;pipCanvas.height=108;pipCtx=pipCanvas.getContext('2d');
+  pipDrawFrame();pipStream=pipCanvas.captureStream(6);const v=$('#pipv');v.srcObject=pipStream;
+  v.addEventListener('play',()=>{if(A&&!A.run)start()});v.addEventListener('pause',()=>{if(A&&A.run)pause()});
+  v.addEventListener('enterpictureinpicture',()=>{if(!pipRAF)pipLoop()})}
+function pipArm(){
   if(pipArmed||!pipOk())return;
-  try{pipCanvas=document.createElement('canvas');pipCanvas.width=240;pipCanvas.height=108;pipCtx=pipCanvas.getContext('2d');
-   pipDrawFrame();pipStream=pipCanvas.captureStream(6);const v=$('#pipv');v.srcObject=pipStream;
-   v.addEventListener('play',()=>{if(A&&!A.run)start()});v.addEventListener('pause',()=>{if(A&&A.run)pause()});
-   v.addEventListener('enterpictureinpicture',()=>{if(!pipRAF)pipLoop()});
-   await v.play();pipArmed=true;if(!pipRAF)pipLoop()}catch(e){pipArmed=false}}
-async function pipOpen(){
+  try{pipEnsure();$('#pipv').play().then(()=>{pipArmed=true;if(!pipRAF)pipLoop()}).catch(()=>{})}catch(e){}}
+function pipOpen(){
   if(!pipOk()){toast('Floating mini timer isn’t supported in this browser');return}
-  await pipArm();
-  try{await $('#pipv').requestPictureInPicture()}catch(e){toast('Couldn’t open the floating timer here')}}
+  try{
+    pipEnsure();const v=$('#pipv');
+    if(v.paused)v.play().catch(()=>{});
+    v.requestPictureInPicture().then(()=>{pipArmed=true;if(!pipRAF)pipLoop()}).catch(e=>{
+      console.error('PiP error',e);toast('Couldn’t open the floating timer here'+(e&&e.name?' ('+e.name+')':''))})
+  }catch(e){console.error('PiP error',e);toast('Couldn’t open the floating timer here'+(e&&e.name?' ('+e.name+')':''))}}
 function pipTeardown(){
   try{if(document.pictureInPictureElement===$('#pipv'))document.exitPictureInPicture()}catch(e){}
   cancelAnimationFrame(pipRAF);pipRAF=null;
